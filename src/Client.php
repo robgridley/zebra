@@ -12,7 +12,7 @@ class Client
     /**
      * Create an instance.
      *
-     * @param $host
+     * @param string $host
      * @param int $port
      */
     public function __construct($host, $port = 9100)

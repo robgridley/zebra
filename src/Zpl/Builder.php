@@ -52,8 +52,8 @@ class Builder
     /**
      * Handle dynamic method calls.
      *
-     * @param $method
-     * @param $arguments
+     * @param string $method
+     * @param array $arguments
      * @return self
      */
     public function __call($method, $arguments)

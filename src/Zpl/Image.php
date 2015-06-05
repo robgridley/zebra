@@ -12,7 +12,7 @@ class Image
     /**
      * Create an instance.
      *
-     * @param $image
+     * @param string $image
      */
     public function __construct($image)
     {
@@ -37,7 +37,7 @@ class Image
     /**
      * The width in bytes.
      *
-     * @return float
+     * @return int
      */
     public function widthInBytes()
     {
@@ -92,7 +92,7 @@ class Image
     /**
      * Convert a binary string to ASCII hexadecimal numbers, two digits per byte.
      *
-     * @param $bits
+     * @param string $bits
      * @return string
      */
     protected function pack($bits)
