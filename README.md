@@ -7,7 +7,7 @@ Requires: PHP 5.6 with the GD module.
 * Convert images to ASCII hex bitmaps (JPEG, PNG, GIF, WBMP, and GD2 supported).
 * Simple wrapper for PHP sockets to send ZPL to the printer via raw TCP/IP (port 9100).
 
-## Examples
+## Example
 The following example will print a label with an image positioned 50 dots from the top left.
 ```php
 use Zebra\Client;
@@ -28,4 +28,9 @@ The same example using static constructors and method chaining:
 $image = new Image(file_get_contents('example.png'));
 $zpl = Zpl::start()->fo(50, 50)->gf($image);
 Client::printer('10.0.0.50')->send($zpl);
+```
+## Installation with Composer
+```
+$ composer require 'robgridley/zebra:dev-master'
+$ composer update
 ```
