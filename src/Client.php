@@ -1,4 +1,6 @@
-<?php namespace Zebra;
+<?php
+
+namespace Zebra;
 
 class Client
 {
@@ -51,7 +53,7 @@ class Client
     {
         $this->socket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
-        if ( ! $this->socket || ! @socket_connect($this->socket, $host, $port)) {
+        if (!$this->socket || !@socket_connect($this->socket, $host, $port)) {
             $error = $this->getLastError();
             throw new ClientException($error['message'], $error['code']);
         }
@@ -72,7 +74,7 @@ class Client
      */
     public function send($zpl)
     {
-        if ( ! @socket_write($this->socket, $zpl)) {
+        if (!@socket_write($this->socket, $zpl)) {
             $error = $this->getLastError();
             throw new ClientException($error['message'], $error['code']);
         }

@@ -1,4 +1,6 @@
-<?php namespace Zebra;
+<?php
+
+namespace Zebra;
 
 use RuntimeException;
 

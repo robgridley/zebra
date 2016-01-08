@@ -17,14 +17,14 @@ class ImageSpec extends ObjectBehavior
 
     function it_converts_images_to_ascii_hexadecimal_bitmaps()
     {
-        $this->__toString()->shouldReturn('00400000400002E80003F80003F80013F9001BFB003FFF80FFFFE07FFFC03FFF801FFF000FFE0007FC000E4E00004000004000004000');
+        $this->__toString()->shouldReturn('004,:02E8,03F8,:13F9,1BFB,3IF8,JFE,7IFC,3IF8,1IF,0FFE,07FC,0E4E,004,::');
     }
 
     function it_ignores_the_colour_palette_order_of_the_incoming_image()
     {
         $this->beConstructedWith(file_get_contents(__DIR__ . '/../test.gif'));
 
-        $this->__toString()->shouldReturn('FFBFE0FFBFE0FD17E0FC07E0FC07E0EC06E0E404E0C00060000000800020C00060E000E0F001E0F803E0F1B1E0FFBFE0FFBFE0FFBFE0');
+        $this->__toString()->shouldReturn('FFBFE,:FD17E,FC07E,:EC06E,E404E,CI06,,8I02,CI06,EI0E,F001E,F803E,F1B1E,FFBFE,::');
     }
 
     function it_gets_the_dimensions_of_the_image_in_pixels()

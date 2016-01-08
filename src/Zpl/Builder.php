@@ -1,4 +1,6 @@
-<?php namespace Zebra\Zpl;
+<?php
+
+namespace Zebra\Zpl;
 
 class Builder
 {
@@ -7,7 +9,7 @@ class Builder
      *
      * @var array
      */
-    protected $zpl = array();
+    protected $zpl = [];
 
     /**
      * Create a new instance statically.
@@ -22,12 +24,13 @@ class Builder
     /**
      * Add a command.
      *
-     * @param string $command
-     * @param mixed $parameters,...
      * @return self
      */
-    public function command($command, ...$parameters)
+    public function command()
     {
+        $parameters = func_get_args();
+        $command = array_shift($parameters);
+
         $parameters = array_map([$this, 'convert'], $parameters);
         $this->zpl[] = '^' . strtoupper($command) . implode(',', $parameters);
 
@@ -58,18 +61,21 @@ class Builder
      */
     public function __call($method, $arguments)
     {
-        return $this->command($method, ...$arguments);
+        array_unshift($arguments, $method);
+
+        return call_user_func_array([$this, 'command'], $arguments);
     }
 
     /**
      * Add GF command.
      *
-     * @param mixed $parameters,...
      * @return self
      */
-    public function gf(...$parameters)
+    public function gf()
     {
-        if (func_num_args() === 1 && ($image = $parameters[0]) instanceof Image) {
+        $arguments = func_get_args();
+
+        if (func_num_args() === 1 && ($image = $arguments[0]) instanceof Image) {
 
             $bytesPerRow = $image->widthInBytes();
             $byteCount = $fieldCount = $bytesPerRow * $image->height();
@@ -77,7 +83,9 @@ class Builder
             return $this->command('GF', 'A', $byteCount, $fieldCount, $bytesPerRow, $image);
         }
 
-        return $this->command('GF', ...$parameters);
+        array_unshift($arguments, 'GF');
+
+        return call_user_func_array([$this, 'command'], $arguments);
     }
 
     /**

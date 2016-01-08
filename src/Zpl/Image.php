@@ -1,4 +1,6 @@
-<?php namespace Zebra\Zpl;
+<?php
+
+namespace Zebra\Zpl;
 
 class Image
 {
@@ -8,6 +10,13 @@ class Image
      * @var resource
      */
     protected $image;
+
+    /**
+     * The ASCII hex data.
+     *
+     * @var string
+     */
+    protected $data;
 
     /**
      * Create an instance.
@@ -26,7 +35,7 @@ class Image
      */
     protected function dither()
     {
-        if ( ! imageistruecolor($this->image)) {
+        if (!imageistruecolor($this->image)) {
             imagepalettetotruecolor($this->image);
         }
 
@@ -41,7 +50,7 @@ class Image
      */
     public function widthInBytes()
     {
-        return (int) ceil($this->width() / 8);
+        return (int)ceil($this->width() / 8);
     }
 
     /**
@@ -69,24 +78,22 @@ class Image
      *
      * @return string
      */
-    protected function getBitmap()
+    protected function getData()
     {
-        $rows = $this->height();
-        $columns = $this->width();
-        $bitmap = null;
+        $rows = [];
 
-        for ($row = 0; $row < $rows; $row++) {
+        for ($row = 0; $row < $this->height(); $row++) {
 
             $bits = null;
 
-            for ($column = 0; $column < $columns; $column++) {
+            for ($column = 0; $column < $this->width(); $column++) {
                 $bits .= imagecolorat($this->image, $column, $row) ? '0' : '1';
             }
 
-            $bitmap .= $this->pack($bits);
+            $rows[] = $this->bitsToBytes($bits);
         }
 
-        return $bitmap;
+        return implode(null, $this->compress($rows));
     }
 
     /**
@@ -95,18 +102,76 @@ class Image
      * @param string $bits
      * @return string
      */
-    protected function pack($bits)
+    protected function bitsToBytes($bits)
     {
         $bytes = str_split($bits, 8);
 
         // Pad the last byte with zeros.
         $bytes[] = str_pad(array_pop($bytes), 8, '0');
 
-        $callback = function ($byte) {
-            return sprintf('%02X', bindec($byte));
+        return implode(null, array_map([$this, 'binToHex'], $bytes));
+    }
+
+    /**
+     * Convert binary byte to hex.
+     *
+     * @param string $byte
+     * @return string
+     */
+    protected function binToHex($byte)
+    {
+        return sprintf('%02X', bindec($byte));
+    }
+
+    /**
+     * Compress the ASCII hex data.
+     *
+     * @param array $rows
+     * @return array
+     */
+    protected function compress(array $rows)
+    {
+        $lastRow = null;
+
+        foreach ($rows as &$row) {
+            if ($row == $lastRow) {
+                $row = ':';
+                continue;
+            }
+
+            $lastRow = $row;
+
+            $row = $this->padWithComma($row);
+            $row = $this->compressRepeatingCharacters($row);
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Replace trailing zeros with a comma.
+     *
+     * @param string $row
+     * @return string
+     */
+    protected function padWithComma($row)
+    {
+        return preg_replace('/0+$/', ',', $row);
+    }
+
+    /**
+     * Compress characters which repeat.
+     *
+     * @param string $row
+     * @return string
+     */
+    protected function compressRepeatingCharacters($row)
+    {
+        $callback = function ($matches) {
+            return chr(ord('F') + strlen($matches[0])) . substr($matches[0], 1, 1);
         };
 
-        return implode(null, array_map($callback, $bytes));
+        return preg_replace_callback('/(.)(\1{2,})/', $callback, $row);
     }
 
     /**
@@ -116,7 +181,11 @@ class Image
      */
     public function __toString()
     {
-        return $this->getBitmap();
+        if (is_null($this->data)) {
+            $this->data = $this->getData();
+        }
+
+        return $this->data;
     }
 
 }
