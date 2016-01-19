@@ -28,6 +28,7 @@ class Image
         $this->image = imagecreatefromstring($image);
 
         $this->dither();
+        $this->asciify();
     }
 
     /**
@@ -74,16 +75,13 @@ class Image
     }
 
     /**
-     * Get the bitmap for the image by looping over every pixel.
-     *
-     * @return string
+     * Create an ASCII bitmap for the image by looping over every pixel.
      */
-    protected function getData()
+    protected function asciify()
     {
         $rows = [];
 
         for ($row = 0; $row < $this->height(); $row++) {
-
             $bits = null;
 
             for ($column = 0; $column < $this->width(); $column++) {
@@ -93,7 +91,7 @@ class Image
             $rows[] = $this->bitsToBytes($bits);
         }
 
-        return implode(null, $this->compress($rows));
+        $this->data = implode(null, $this->compress($rows));
     }
 
     /**
@@ -134,6 +132,7 @@ class Image
         $lastRow = null;
 
         foreach ($rows as &$row) {
+            // Replace a repeated row with a colon.
             if ($row == $lastRow) {
                 $row = ':';
                 continue;
@@ -141,7 +140,7 @@ class Image
 
             $lastRow = $row;
 
-            $row = $this->padWithComma($row);
+            $row = $this->replaceTrailingZerosOrOnes($row);
             $row = $this->compressRepeatingCharacters($row);
         }
 
@@ -149,14 +148,14 @@ class Image
     }
 
     /**
-     * Replace trailing zeros with a comma.
+     * Replace trailing zeros or ones with a comma (,) or exclamation (!) respectively.
      *
      * @param string $row
      * @return string
      */
-    protected function padWithComma($row)
+    protected function replaceTrailingZerosOrOnes($row)
     {
-        return preg_replace('/0+$/', ',', $row);
+        return preg_replace(['/0+$/', '/F+$/'], [',', '!'], $row);
     }
 
     /**
@@ -168,7 +167,25 @@ class Image
     protected function compressRepeatingCharacters($row)
     {
         $callback = function ($matches) {
-            return chr(ord('F') + strlen($matches[0])) . substr($matches[0], 1, 1);
+            $original = $matches[0];
+            $repeat = strlen($original);
+            $count = null;
+
+            if ($repeat > 400) {
+                $count .= str_repeat('z', floor($repeat / 400));
+                $repeat = $repeat % 400;
+            }
+
+            if ($repeat > 19) {
+                $count .= chr(ord('f') + floor($repeat / 20));
+                $repeat = $repeat % 20;
+            }
+
+            if ($repeat > 0) {
+                $count .= chr(ord('F') + $repeat);
+            }
+
+            return $count . substr($original, 1, 1);
         };
 
         return preg_replace_callback('/(.)(\1{2,})/', $callback, $row);
@@ -181,10 +198,6 @@ class Image
      */
     public function __toString()
     {
-        if (is_null($this->data)) {
-            $this->data = $this->getData();
-        }
-
         return $this->data;
     }
 
