@@ -2,6 +2,8 @@
 
 namespace Zebra\Zpl;
 
+use Zebra\Contracts\Zpl\Image;
+
 class Builder
 {
     /**
@@ -77,10 +79,10 @@ class Builder
 
         if (func_num_args() === 1 && ($image = $arguments[0]) instanceof Image) {
 
-            $bytesPerRow = $image->widthInBytes();
+            $bytesPerRow = $image->width();
             $byteCount = $fieldCount = $bytesPerRow * $image->height();
 
-            return $this->command('GF', 'A', $byteCount, $fieldCount, $bytesPerRow, $image);
+            return $this->command('GF', 'A', $byteCount, $fieldCount, $bytesPerRow, $image->toAscii());
         }
 
         array_unshift($arguments, 'GF');

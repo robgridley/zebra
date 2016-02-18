@@ -48,6 +48,7 @@ class Client
      * @param string $host
      * @param int $port
      * @return bool
+     * @throws CommunicationException if the connection fails.
      */
     protected function connect($host, $port)
     {
@@ -55,7 +56,7 @@ class Client
 
         if (!$this->socket || !@socket_connect($this->socket, $host, $port)) {
             $error = $this->getLastError();
-            throw new ClientException($error['message'], $error['code']);
+            throw new CommunicationException($error['message'], $error['code']);
         }
     }
 
@@ -71,12 +72,13 @@ class Client
      * Send ZPL data to printer.
      *
      * @param string $zpl
+     * @throws CommunicationException if writing to the socket fails.
      */
     public function send($zpl)
     {
         if (!@socket_write($this->socket, $zpl)) {
             $error = $this->getLastError();
-            throw new ClientException($error['message'], $error['code']);
+            throw new CommunicationException($error['message'], $error['code']);
         }
     }
 

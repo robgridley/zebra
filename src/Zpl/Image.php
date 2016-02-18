@@ -2,149 +2,176 @@
 
 namespace Zebra\Zpl;
 
-class Image
+use RuntimeException;
+use Zebra\Contracts\Zpl\Image as ImageContract;
+
+class Image implements ImageContract
 {
     /**
-     * The image identifier.
+     * The GD image resource.
      *
      * @var resource
      */
     protected $image;
 
     /**
-     * The ASCII hex data.
+     * The image width in pixels.
+     *
+     * @var int
+     */
+    protected $width;
+
+    /**
+     * The image height in pixels.
+     *
+     * @var int
+     */
+    protected $height;
+
+    /**
+     * The ASCII hexadecimal encoded image data.
      *
      * @var string
      */
-    protected $data;
+    protected $encoded;
 
     /**
      * Create an instance.
      *
-     * @param string $image
+     * @param string $data
      */
-    public function __construct($image)
+    public function __construct($data)
     {
-        $this->image = imagecreatefromstring($image);
-
-        $this->dither();
-        $this->asciify();
+        $this->image = $this->create($data);
+        $this->width = imagesx($this->image);
+        $this->height = imagesy($this->image);
     }
 
     /**
-     * Convert the image to 2 colours with dithering.
+     * Destroy an instance.
      */
-    protected function dither()
+    public function __destruct()
     {
-        if (!imageistruecolor($this->image)) {
-            imagepalettetotruecolor($this->image);
-        }
-
-        imagefilter($this->image, IMG_FILTER_GRAYSCALE);
-        imagetruecolortopalette($this->image, true, 2);
+        imagedestroy($this->image);
     }
 
     /**
-     * The width in bytes.
-     *
-     * @return int
-     */
-    public function widthInBytes()
-    {
-        return (int)ceil($this->width() / 8);
-    }
-
-    /**
-     * The width in pixels.
+     * {@inheritdoc}
      *
      * @return int
      */
     public function width()
     {
-        return imagesx($this->image);
+        return (int)ceil($this->width / 8);
     }
 
     /**
-     * The height in pixels.
+     * {@inheritdoc}
      *
      * @return int
      */
     public function height()
     {
-        return imagesy($this->image);
+        return $this->height;
     }
 
     /**
-     * Create an ASCII bitmap for the image by looping over every pixel.
+     * {@inheritdoc}
+     *
+     * @return string
      */
-    protected function asciify()
+    public function toAscii()
     {
-        $rows = [];
+        return $this->encoded ?: $this->encoded = $this->encode();
+    }
 
-        for ($row = 0; $row < $this->height(); $row++) {
+    /**
+     * Create a new GD image from the supplied string.
+     *
+     * @param $data
+     * @return resource
+     */
+    protected function create($data)
+    {
+        if (false === $image = imagecreatefromstring($data)) {
+            throw new RuntimeException('Could not read image.');
+        }
+
+        if (!imageistruecolor($image)) {
+            imagepalettetotruecolor($image);
+        }
+
+        imagefilter($image, IMG_FILTER_GRAYSCALE);
+
+        return $image;
+    }
+
+    /**
+     * Encode the image in ASCII hexadecimal by looping over every pixel.
+     *
+     * @return string
+     */
+    protected function encode()
+    {
+        $bitmap = null;
+
+        for ($row = 0; $row < $this->height; $row++) {
             $bits = null;
 
-            for ($column = 0; $column < $this->width(); $column++) {
-                $bits .= imagecolorat($this->image, $column, $row) ? '0' : '1';
+            for ($column = 0; $column < $this->width; $column++) {
+                $bits .= (imagecolorat($this->image, $column, $row) & 0xFF) < 127 ? '1' : '0';
             }
 
-            $rows[] = $this->bitsToBytes($bits);
-        }
+            $bytes = str_split($bits, 8);
+            $bytes[] = str_pad(array_pop($bytes), 8, '0');
 
-        $this->data = implode(null, $this->compress($rows));
-    }
+            $ascii = null;
 
-    /**
-     * Convert a binary string to ASCII hexadecimal numbers, two digits per byte.
-     *
-     * @param string $bits
-     * @return string
-     */
-    protected function bitsToBytes($bits)
-    {
-        $bytes = str_split($bits, 8);
-
-        // Pad the last byte with zeros.
-        $bytes[] = str_pad(array_pop($bytes), 8, '0');
-
-        return implode(null, array_map([$this, 'binToHex'], $bytes));
-    }
-
-    /**
-     * Convert binary byte to hex.
-     *
-     * @param string $byte
-     * @return string
-     */
-    protected function binToHex($byte)
-    {
-        return sprintf('%02X', bindec($byte));
-    }
-
-    /**
-     * Compress the ASCII hex data.
-     *
-     * @param array $rows
-     * @return array
-     */
-    protected function compress(array $rows)
-    {
-        $lastRow = null;
-
-        foreach ($rows as &$row) {
-            // Replace a repeated row with a colon.
-            if ($row == $lastRow) {
-                $row = ':';
-                continue;
+            foreach ($bytes as $byte) {
+                $ascii .= sprintf('%02X', bindec($byte));
             }
 
-            $lastRow = $row;
-
-            $row = $this->replaceTrailingZerosOrOnes($row);
-            $row = $this->compressRepeatingCharacters($row);
+            $bitmap .= $this->compress($ascii);
         }
 
-        return $rows;
+        return $bitmap;
+    }
+
+    /**
+     * Compress a row of ASCII hexadecimal data.
+     *
+     * @param string $row
+     * @return string
+     */
+    protected function compress($row)
+    {
+        if ($this->matchesLastRow($row)) {
+            return ':';
+        }
+
+        $row = $this->compressTrailingZerosOrOnes($row);
+        $row = $this->compressRepeatingCharacters($row);
+
+        return $row;
+    }
+
+    /**
+     * Determine if the specified row is the same as the last row.
+     *
+     * @param string $row
+     * @return bool
+     */
+    protected function matchesLastRow($row)
+    {
+        static $lastRow = null;
+
+        if ($row == $lastRow) {
+            return true;
+        }
+
+        $lastRow = $row;
+
+        return false;
     }
 
     /**
@@ -153,7 +180,7 @@ class Image
      * @param string $row
      * @return string
      */
-    protected function replaceTrailingZerosOrOnes($row)
+    protected function compressTrailingZerosOrOnes($row)
     {
         return preg_replace(['/0+$/', '/F+$/'], [',', '!'], $row);
     }
@@ -190,15 +217,4 @@ class Image
 
         return preg_replace_callback('/(.)(\1{2,})/', $callback, $row);
     }
-
-    /**
-     * Get the instance as a string.
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->data;
-    }
-
 }
