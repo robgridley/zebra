@@ -115,23 +115,23 @@ class Image implements ImageContract
     {
         $bitmap = null;
 
-        for ($row = 0; $row < $this->height; $row++) {
+        for ($y = 0; $y < $this->height; $y++) {
             $bits = null;
 
-            for ($column = 0; $column < $this->width; $column++) {
-                $bits .= (imagecolorat($this->image, $column, $row) & 0xFF) < 127 ? '1' : '0';
+            for ($x = 0; $x < $this->width; $x++) {
+                $bits .= (imagecolorat($this->image, $x, $y) & 0xFF) < 127 ? '1' : '0';
             }
 
             $bytes = str_split($bits, 8);
             $bytes[] = str_pad(array_pop($bytes), 8, '0');
 
-            $ascii = null;
+            $row = null;
 
             foreach ($bytes as $byte) {
-                $ascii .= sprintf('%02X', bindec($byte));
+                $row .= sprintf('%02X', bindec($byte));
             }
 
-            $bitmap .= $this->compress($ascii);
+            $bitmap .= $this->compress($row);
         }
 
         return $bitmap;
