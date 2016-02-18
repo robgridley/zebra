@@ -31,10 +31,10 @@ class Builder
     public function command()
     {
         $parameters = func_get_args();
-        $command = array_shift($parameters);
+        $command = strtoupper(array_shift($parameters));
+        $parameters = array_map([$this, 'parameter'], $parameters);
 
-        $parameters = array_map([$this, 'convert'], $parameters);
-        $this->zpl[] = '^' . strtoupper($command) . implode(',', $parameters);
+        $this->zpl[] = '^' . $command . implode(',', $parameters);
 
         return $this;
     }
@@ -45,7 +45,7 @@ class Builder
      * @param mixed $parameter
      * @return mixed
      */
-    protected function convert($parameter)
+    protected function parameter($parameter)
     {
         if (is_bool($parameter)) {
             return $parameter ? 'Y' : 'N';
@@ -78,7 +78,6 @@ class Builder
         $arguments = func_get_args();
 
         if (func_num_args() === 1 && ($image = $arguments[0]) instanceof ImageContract) {
-
             $bytesPerRow = $image->width();
             $byteCount = $fieldCount = $bytesPerRow * $image->height();
 

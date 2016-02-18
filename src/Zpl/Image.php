@@ -200,12 +200,12 @@ class Image implements ImageContract
 
             if ($repeat > 400) {
                 $count .= str_repeat('z', floor($repeat / 400));
-                $repeat = $repeat % 400;
+                $repeat %= 400;
             }
 
             if ($repeat > 19) {
                 $count .= chr(ord('f') + floor($repeat / 20));
-                $repeat = $repeat % 20;
+                $repeat %= 20;
             }
 
             if ($repeat > 0) {
