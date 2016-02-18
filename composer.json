@@ -1,6 +1,8 @@
 {
 	"name": "robgridley/zebra",
-	"description": "PHP ZPL builder and a basic client for network-connected Zebra label printers.",
+	"description": "PHP ZPL builder, image conversion and a basic client for network-connected Zebra label printers.",
+	"keywords": ["zebra", "zpl", "image"],
+	"license": "MIT",
 	"require": {
 		"php": ">=5.5.9",
 		"ext-gd": "*"
