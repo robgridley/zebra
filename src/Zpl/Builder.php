@@ -2,7 +2,7 @@
 
 namespace Zebra\Zpl;
 
-use Zebra\Contracts\Zpl\Image;
+use Zebra\Contracts\Zpl\Image as ImageContract;
 
 class Builder
 {
@@ -77,7 +77,7 @@ class Builder
     {
         $arguments = func_get_args();
 
-        if (func_num_args() === 1 && ($image = $arguments[0]) instanceof Image) {
+        if (func_num_args() === 1 && ($image = $arguments[0]) instanceof ImageContract) {
 
             $bytesPerRow = $image->width();
             $byteCount = $fieldCount = $bytesPerRow * $image->height();
