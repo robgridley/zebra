@@ -114,6 +114,7 @@ class Image implements ImageContract
     protected function encode()
     {
         $bitmap = null;
+        $lastRow = null;
 
         for ($y = 0; $y < $this->height; $y++) {
             $bits = null;
@@ -131,7 +132,8 @@ class Image implements ImageContract
                 $row .= sprintf('%02X', bindec($byte));
             }
 
-            $bitmap .= $this->compress($row);
+            $bitmap .= $this->compress($row, $lastRow);
+            $lastRow = $row;
         }
 
         return $bitmap;
@@ -141,11 +143,12 @@ class Image implements ImageContract
      * Compress a row of ASCII hexadecimal data.
      *
      * @param string $row
+     * @param string $lastRow
      * @return string
      */
-    protected function compress($row)
+    protected function compress($row, $lastRow)
     {
-        if ($this->matchesLastRow($row)) {
+        if ($row === $lastRow) {
             return ':';
         }
 
@@ -153,25 +156,6 @@ class Image implements ImageContract
         $row = $this->compressRepeatingCharacters($row);
 
         return $row;
-    }
-
-    /**
-     * Determine if the specified row is the same as the last row.
-     *
-     * @param string $row
-     * @return bool
-     */
-    protected function matchesLastRow($row)
-    {
-        static $lastRow = null;
-
-        if ($row == $lastRow) {
-            return true;
-        }
-
-        $lastRow = $row;
-
-        return false;
     }
 
     /**
