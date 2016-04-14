@@ -76,7 +76,7 @@ class Client
      */
     public function send($zpl)
     {
-        if (!@socket_write($this->socket, $zpl)) {
+        if (false === @socket_write($this->socket, $zpl)) {
             $error = $this->getLastError();
             throw new CommunicationException($error['message'], $error['code']);
         }
