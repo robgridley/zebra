@@ -96,7 +96,7 @@ class Builder
      */
     public function toZpl()
     {
-        return implode("\n", array_merge(['^XA'], $this->zpl, ['^XZ']));
+        return implode('', array_merge(['^XA'], $this->zpl, ['^XZ']));
     }
 
     /**
