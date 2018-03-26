@@ -93,7 +93,9 @@ class Image implements ImageContract
      */
     protected function create($data)
     {
-        if (false === $image = imagecreatefromstring($data)) {
+        if (is_resource($data) && get_resource_type($data) == 'gd') {
+		    $image = $data;
+		} elseif (false === $image = imagecreatefromstring($data)) {
             throw new RuntimeException('Could not read image.');
         }
 
