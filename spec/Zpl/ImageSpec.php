@@ -10,7 +10,7 @@ class ImageSpec extends ObjectBehavior
 {
     function let()
     {
-        $decoder = GdDecoder::createFromPath(__DIR__ . '/../test_150.png');
+        $decoder = GdDecoder::fromPath(__DIR__ . '/../test_150.png');
         $this->beConstructedWith($decoder);
     }
 
@@ -21,7 +21,7 @@ class ImageSpec extends ObjectBehavior
 
     function it_converts_large_images_to_compressed_ascii_hexadecimal_bitmaps()
     {
-        $decoder = GdDecoder::createFromPath(__DIR__ . '/../test_1000.png');
+        $decoder = GdDecoder::fromPath(__DIR__ . '/../test_1000.png');
         $this->beConstructedWith($decoder);
 
         $this->toAscii()->shouldReturn(file_get_contents(__DIR__ . '/../test_1000.txt'));

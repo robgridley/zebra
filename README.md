@@ -18,7 +18,8 @@ use Zebra\Zpl\Image;
 use Zebra\Zpl\Builder;
 use Zebra\Zpl\GdDecoder;
 
-$image = new Image(GdDecoder::createFromPath('example.png'));
+$decoder = GdDecoder::fromPath('example.png');
+$image = new Image($decoder);
 
 $zpl = new Builder();
 $zpl->fo(50, 50)->gf($image)->fs();

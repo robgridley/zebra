@@ -63,7 +63,7 @@ class GdDecoder implements Decoder
      * @param resource $image
      * @return GdDecoder
      */
-    public static function createFromResource($image): self
+    public static function fromResource($image): self
     {
         return new static($image);
     }
@@ -75,9 +75,9 @@ class GdDecoder implements Decoder
      * @param string $path
      * @return GdDecoder
      */
-    public static function createFromPath(string $path): self
+    public static function fromPath(string $path): self
     {
-        return static::createFromString(file_get_contents($path));
+        return static::fromString(file_get_contents($path));
     }
 
     /**
@@ -86,7 +86,7 @@ class GdDecoder implements Decoder
      * @param string $data
      * @return GdDecoder
      */
-    public static function createFromString(string $data): self
+    public static function fromString(string $data): self
     {
         if (false === $image = imagecreatefromstring($data)) {
             throw new InvalidArgumentException('Could not read image');
