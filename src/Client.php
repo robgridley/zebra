@@ -35,9 +35,9 @@ class Client
      *
      * @param string $host
      * @param int $port
-     * @return self
+     * @return Client
      */
-    public static function printer($host, $port = 9100)
+    public static function printer(string $host, int $port = 9100): self
     {
         return new static($host, $port);
     }
@@ -47,10 +47,9 @@ class Client
      *
      * @param string $host
      * @param int $port
-     * @return bool
      * @throws CommunicationException if the connection fails.
      */
-    protected function connect($host, $port)
+    protected function connect(string $host, int $port): void
     {
         $this->socket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
@@ -63,7 +62,7 @@ class Client
     /**
      * Close connection to printer.
      */
-    protected function disconnect()
+    protected function disconnect(): void
     {
         @socket_close($this->socket);
     }
@@ -74,7 +73,7 @@ class Client
      * @param string $zpl
      * @throws CommunicationException if writing to the socket fails.
      */
-    public function send($zpl)
+    public function send(string $zpl): void
     {
         if (false === @socket_write($this->socket, $zpl)) {
             $error = $this->getLastError();
@@ -87,7 +86,7 @@ class Client
      *
      * @return array
      */
-    protected function getLastError()
+    protected function getLastError(): array
     {
         $code = socket_last_error($this->socket);
         $message = socket_strerror($code);

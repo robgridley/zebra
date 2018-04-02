@@ -4,7 +4,9 @@
 	"keywords": ["zebra", "zpl", "image"],
 	"license": "MIT",
 	"require": {
-		"php": ">=5.5.9",
+		"php": ">=7.1.0"
+	},
+	"suggest": {
 		"ext-gd": "*"
 	},
 	"require-dev": {
@@ -20,5 +22,8 @@
 		"psr-4": {
 			"Zebra\\": "src/"
 		}
+	},
+	"scripts": {
+		"test": "phpspec --ansi run"
 	}
 }

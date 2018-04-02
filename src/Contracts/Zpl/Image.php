@@ -9,19 +9,19 @@ interface Image
      *
      * @return int
      */
-    public function width();
+    public function width(): int;
 
     /**
      * Get the image height in pixels.
      *
      * @return int
      */
-    public function height();
+    public function height(): int;
 
     /**
      * Get the ASCII hex representation of the image.
      *
      * @return string
      */
-    public function toAscii();
+    public function toAscii(): string;
 }

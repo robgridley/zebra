@@ -1,4 +1,6 @@
-<?php namespace spec\Zebra\Zpl;
+<?php
+
+namespace spec\Zebra\Zpl;
 
 use Prophecy\Argument;
 use PhpSpec\ObjectBehavior;

@@ -2,31 +2,17 @@
 
 namespace Zebra\Zpl;
 
-use RuntimeException;
+use Zebra\Contracts\Zpl\Decoder;
 use Zebra\Contracts\Zpl\Image as ImageContract;
 
 class Image implements ImageContract
 {
     /**
-     * The GD image resource.
+     * The decoder instance.
      *
      * @var resource
      */
-    protected $image;
-
-    /**
-     * The image width in pixels.
-     *
-     * @var int
-     */
-    protected $width;
-
-    /**
-     * The image height in pixels.
-     *
-     * @var int
-     */
-    protected $height;
+    protected $decoder;
 
     /**
      * The ASCII hexadecimal encoded image data.
@@ -36,23 +22,29 @@ class Image implements ImageContract
     protected $encoded;
 
     /**
-     * Create an instance.
+     * The image width (in pixels).
      *
-     * @param string $data
+     * @var int
      */
-    public function __construct($data)
-    {
-        $this->image = $this->create($data);
-        $this->width = imagesx($this->image);
-        $this->height = imagesy($this->image);
-    }
+    protected $width;
 
     /**
-     * Destroy an instance.
+     * The image height (in pixels).
+     *
+     * @var int
      */
-    public function __destruct()
+    protected $height;
+
+    /**
+     * Create a new image instance.
+     *
+     * @param Decoder $decoder
+     */
+    public function __construct(Decoder $decoder)
     {
-        imagedestroy($this->image);
+        $this->width = $decoder->width();
+        $this->height = $decoder->height();
+        $this->decoder = $decoder;
     }
 
     /**
@@ -60,7 +52,7 @@ class Image implements ImageContract
      *
      * @return int
      */
-    public function width()
+    public function width(): int
     {
         return (int)ceil($this->width / 8);
     }
@@ -70,7 +62,7 @@ class Image implements ImageContract
      *
      * @return int
      */
-    public function height()
+    public function height(): int
     {
         return $this->height;
     }
@@ -80,30 +72,9 @@ class Image implements ImageContract
      *
      * @return string
      */
-    public function toAscii()
+    public function toAscii(): string
     {
         return $this->encoded ?: $this->encoded = $this->encode();
-    }
-
-    /**
-     * Create a new GD image from the supplied string.
-     *
-     * @param $data
-     * @return resource
-     */
-    protected function create($data)
-    {
-        if (false === $image = imagecreatefromstring($data)) {
-            throw new RuntimeException('Could not read image.');
-        }
-
-        if (!imageistruecolor($image)) {
-            imagepalettetotruecolor($image);
-        }
-
-        imagefilter($image, IMG_FILTER_GRAYSCALE);
-
-        return $image;
     }
 
     /**
@@ -111,7 +82,7 @@ class Image implements ImageContract
      *
      * @return string
      */
-    protected function encode()
+    protected function encode(): string
     {
         $bitmap = null;
         $lastRow = null;
@@ -120,7 +91,7 @@ class Image implements ImageContract
             $bits = null;
 
             for ($x = 0; $x < $this->width; $x++) {
-                $bits .= (imagecolorat($this->image, $x, $y) & 0xFF) < 127 ? '1' : '0';
+                $bits .= $this->decoder->getBitAt($x, $y);
             }
 
             $bytes = str_split($bits, 8);
@@ -146,7 +117,7 @@ class Image implements ImageContract
      * @param string $lastRow
      * @return string
      */
-    protected function compress($row, $lastRow)
+    protected function compress(string $row, ?string $lastRow): string
     {
         if ($row === $lastRow) {
             return ':';
@@ -164,7 +135,7 @@ class Image implements ImageContract
      * @param string $row
      * @return string
      */
-    protected function compressTrailingZerosOrOnes($row)
+    protected function compressTrailingZerosOrOnes(string $row): string
     {
         return preg_replace(['/0+$/', '/F+$/'], [',', '!'], $row);
     }
@@ -175,7 +146,7 @@ class Image implements ImageContract
      * @param string $row
      * @return string
      */
-    protected function compressRepeatingCharacters($row)
+    protected function compressRepeatingCharacters(string $row): string
     {
         $callback = function ($matches) {
             $original = $matches[0];

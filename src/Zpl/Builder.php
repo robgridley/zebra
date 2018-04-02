@@ -14,21 +14,11 @@ class Builder
     protected $zpl = [];
 
     /**
-     * Create a new instance statically.
-     *
-     * @return self
-     */
-    public static function start()
-    {
-        return new static;
-    }
-
-    /**
      * Add a command.
      *
-     * @return self
+     * @return Builder
      */
-    public function command()
+    public function command(): self
     {
         $parameters = func_get_args();
         $command = strtoupper(array_shift($parameters));
@@ -59,7 +49,7 @@ class Builder
      *
      * @param string $method
      * @param array $arguments
-     * @return self
+     * @return Builder
      */
     public function __call($method, $arguments)
     {
@@ -71,9 +61,9 @@ class Builder
     /**
      * Add GF command.
      *
-     * @return self
+     * @return Builder
      */
-    public function gf()
+    public function gf(): self
     {
         $arguments = func_get_args();
 
@@ -94,7 +84,7 @@ class Builder
      *
      * @return string
      */
-    public function toZpl()
+    public function toZpl(): string
     {
         return implode('', array_merge(['^XA'], $this->zpl, ['^XZ']));
     }
@@ -108,5 +98,4 @@ class Builder
     {
         return $this->toZpl();
     }
-
 }

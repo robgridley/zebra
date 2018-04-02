@@ -1,13 +1,17 @@
-<?php namespace spec\Zebra\Zpl;
+<?php
+
+namespace spec\Zebra\Zpl;
 
 use Prophecy\Argument;
+use Zebra\Zpl\GdDecoder;
 use PhpSpec\ObjectBehavior;
 
 class ImageSpec extends ObjectBehavior
 {
     function let()
     {
-        $this->beConstructedWith(file_get_contents(__DIR__ . '/../test_150.png'));
+        $decoder = GdDecoder::createFromPath(__DIR__ . '/../test_150.png');
+        $this->beConstructedWith($decoder);
     }
 
     function it_converts_images_to_compressed_ascii_hexadecimal_bitmaps()
@@ -17,7 +21,8 @@ class ImageSpec extends ObjectBehavior
 
     function it_converts_large_images_to_compressed_ascii_hexadecimal_bitmaps()
     {
-        $this->beConstructedWith(file_get_contents(__DIR__ . '/../test_1000.png'));
+        $decoder = GdDecoder::createFromPath(__DIR__ . '/../test_1000.png');
+        $this->beConstructedWith($decoder);
 
         $this->toAscii()->shouldReturn(file_get_contents(__DIR__ . '/../test_1000.txt'));
     }
