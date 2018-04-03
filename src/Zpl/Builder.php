@@ -82,11 +82,12 @@ class Builder
     /**
      * Convert instance to ZPL.
      *
+     * @param bool $newlines
      * @return string
      */
-    public function toZpl(): string
+    public function toZpl(bool $newlines = false): string
     {
-        return implode('', array_merge(['^XA'], $this->zpl, ['^XZ']));
+        return implode($newlines ? "\n" : '', array_merge(['^XA'], $this->zpl, ['^XZ']));
     }
 
     /**
