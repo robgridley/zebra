@@ -26,6 +26,14 @@ class ImageSpec extends ObjectBehavior
 
         $this->toAscii()->shouldReturn(file_get_contents(__DIR__ . '/../test_1000.txt'));
     }
+    
+    function it_interpets_transparent_as_white()
+    {
+        $decoder = GdDecoder::fromPath(__DIR__ . '/../test_85.png');
+        $this->beConstructedWith($decoder);
+        
+        $this->toAscii()->shouldReturn(trim(file_get_contents(__DIR__ . '/../test_85.txt')));
+    }
 
     function it_gets_the_height_of_the_image_in_rows()
     {

@@ -29,6 +29,19 @@ class GdDecoder implements Decoder
             imagepalettetotruecolor($image);
         }
 
+        // Converts transparancy to white.
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $newImage = imagecreatetruecolor($width, $height);
+        $white = imagecolorallocate($newImage, 255, 255, 255);
+        imagefill($newImage, 0, 0, $white);
+        imagecopyresampled(
+            $newImage, $image,
+            0, 0, 0, 0,
+            $width, $height,
+            $width, $height);
+        $image = $newImage;
+        
         imagefilter($image, IMG_FILTER_GRAYSCALE);
 
         $this->image = $image;
@@ -119,3 +132,4 @@ class GdDecoder implements Decoder
         return (imagecolorat($this->image, $x, $y) & 0xFF) < 127 ? 1 : 0;
     }
 }
+
