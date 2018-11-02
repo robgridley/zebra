@@ -144,7 +144,12 @@ class PrinterStatus
      */
     public function getHandshakeType() : string
     {
-        return !!$this->getCommBit(7)  ? 'Xon/Xoff' : 'DTR';
+        switch ($this->getCommBit(7)) {
+            case 0:
+                return 'Xon/Xoff';
+            case 1:
+                return 'DTR';
+        }
     }
 
     /**
@@ -175,7 +180,12 @@ class PrinterStatus
      */
     public function getStopBits() : int
     {
-        return !!$this->getCommBit(4) ? 1 : 2;
+        switch ($this->getCommBit(4)) {
+            case 0:
+                return 1;
+            case 1:
+                return 2;
+        }
     }
 
     /**
@@ -183,7 +193,12 @@ class PrinterStatus
      */
     public function getDataBits() : int
     {
-        return !!$this->getCommBit(3) ? 7 : 8;
+        switch ($this->getCommBit(3)) {
+            case 0:
+                return 7;
+            case 1:
+                return 8;
+        }
     }
 
     /**
@@ -402,9 +417,11 @@ class PrinterStatus
      */
     private function getCommBit(int $bit) : int
     {
-        $raw = $this->data[self::POS_COMM_SETTINGS];
-        $binary = str_pad(decbin($raw),9,"0",STR_PAD_LEFT);
-        return (int) substr($binary,8 - $bit, 1);
+        $asInt = intval($this->data[self::POS_COMM_SETTINGS], 10);
+
+        $mask = 1 << $bit;
+
+        return $asInt & $mask ? 1 : 0;
     }
 
     /**
@@ -415,8 +432,10 @@ class PrinterStatus
      */
     private function getMediaBit(int $bit) : int
     {
-        $raw = (int) $this->data[self::POS_FUNCTION_SETTINGS];
-        $binary = str_pad(decbin($raw),8,"0",STR_PAD_LEFT);
-        return (int) substr($binary,7 - $bit, 1);
+        $asInt = intval($this->data[self::POS_FUNCTION_SETTINGS], 10);
+
+        $mask = 1 << $bit;
+
+        return $asInt & $mask ? 1 : 0;
     }
 }
