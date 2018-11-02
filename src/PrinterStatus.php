@@ -162,7 +162,13 @@ class PrinterStatus
         if (!$this->isSerialEnabled()) {
             return null;
         }
-        return !!$this->getCommBit(6) ? self::PARITY_EVEN : self::PARITY_ODD;
+
+        switch ($this->getCommBit(6)) {
+            case 0:
+                return self::PARITY_ODD;
+            case 1:
+                return self::PARITY_EVEN;
+        }
     }
 
     /**
