@@ -6,8 +6,8 @@ namespace Zebra;
 /**
  * Class Status
  *
- * This class is translation of the results of an `~HS` ZPL command return so that its values can easily be used without
- * the specific knowledge of the return codes.
+ * This class is a translation of the results of an `~HS` ZPL command return so that its values can easily be used
+ * without needing the specific knowledge of the return codes.
  *
  * @see https://support.zebra.com/cpws/docs/zpl/zpl_manual.pdf (pages 227-229, Host Status Return)
  *
@@ -38,7 +38,10 @@ class PrinterStatus
     const POS_IMAGES_IN_MEMORY = 22;
     const POS_PASSWORD = 23;
     const POS_STATIC_RAM_INSTALLED = 24;
-    
+
+    const PARITY_EVEN = 'EVEN';
+    const PARITY_ODD = 'ODD';
+
     const BAUD_CODES = [
         '0000' => 110,
         '0001' => 300,
@@ -145,17 +148,24 @@ class PrinterStatus
     }
 
     /**
-     * @return bool
+     * Returns PrinterStatus::PARITY_EVEN or PrinterStatus::PARITY_ODD. If serial communication is disabled return null.
+     *
+     * @return null|string
      */
-    public function isParityEven() : bool
+    public function getParity() : ?string
     {
-        return !!$this->getCommBit(6);
+        if (!$this->isSerialEnabled()) {
+            return null;
+        }
+        return !!$this->getCommBit(6) ? self::PARITY_EVEN : self::PARITY_ODD;
     }
 
     /**
+     * Return true if serial communication is enabled
+     *
      * @return bool
      */
-    public function isEnabled() : bool
+    public function isSerialEnabled() : bool
     {
         return !!$this->getCommBit(5);
     }
