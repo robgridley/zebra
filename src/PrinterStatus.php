@@ -68,6 +68,8 @@ class PrinterStatus
         '7' => "Linerless Rewind",
         '8' => "Partial Cutter",
         '9' => "RFID",
+        'A' => "Linerless Cut",
+        'B' => "Linerless Delayed Cut",
         'K' => "Kiosk",
         'S' => "Stream",
     ];
