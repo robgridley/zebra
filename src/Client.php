@@ -104,7 +104,7 @@ class Client
         $zpl = "~HS";
         $this->send($zpl);
 
-        if (!socket_recv($this->socket, $response, 96, 0) > 0) {
+        if (!socket_recv($this->socket, $response, 96, 0)) {
             return null;
         }
 
