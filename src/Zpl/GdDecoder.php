@@ -54,6 +54,10 @@ class GdDecoder implements Decoder
             return get_resource_type($image) === 'gd';
         }
 
+        if ($image instanceof \GdImage) {
+            return true;
+        }
+
         return false;
     }
 
