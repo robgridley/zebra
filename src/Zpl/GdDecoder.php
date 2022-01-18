@@ -10,14 +10,14 @@ class GdDecoder implements Decoder
     /**
      * The GD image resource.
      *
-     * @var resource
+     * @var resource|\GdImage
      */
     protected $image;
 
     /**
      * Create a new decoder instance.
      *
-     * @param resource $image
+     * @param resource|\GdImage $image
      */
     public function __construct($image)
     {
@@ -52,6 +52,8 @@ class GdDecoder implements Decoder
     {
         if (is_resource($image)) {
             return get_resource_type($image) === 'gd';
+        } elseif (is_object($image) && $image instanceOf \GdImage) {
+            return true;
         }
 
         return false;
