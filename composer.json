@@ -10,7 +10,7 @@
 		"ext-gd": "*"
 	},
 	"require-dev": {
-		"phpspec/phpspec": "~2.0"
+		"phpspec/phpspec": "^7.1"
 	},
 	"authors": [
 		{
